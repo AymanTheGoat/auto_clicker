@@ -1,5 +1,5 @@
 import argparse
-from typing import Tuple, Union
+from typing import Tuple
 from datetime import datetime
 
 def parse_args():
@@ -76,7 +76,7 @@ def parse_args():
     # Colors option
     parser.add_argument(
         '--colors', 
-        action='store_true', 
+        action='store_false', 
         default=True, 
         help="Enable colors (ANSI escape sequences) (default: False)"
     )
@@ -172,3 +172,35 @@ class Logger:
             f.write(f"[{self.__get_formatted_datetime()}]\n")
             f.write(self.__compile(self.log_entry, use_colors=False))
             f.write("\n\n")
+
+
+def logArgs(args):
+    if args.colors: 
+        def colorize(text: str, color_code: str) -> str:
+            return f"\033[{color_code}m{text}\033[0m"
+    else:
+        def colorize(text: str, color_code: str) -> str:
+            return text
+
+    color_map = {
+        "title": "95",       # Magenta
+        "tuple": "94",       # Blue
+        "header": "96",      # Cyan
+        "pressed_key": "93", # Yellow
+        "number": "90",      # Grey
+        "bool_true": "92",   # Green
+        "bool_false": "91",  # Red
+    }
+
+    string = f"""{colorize('keyboard duration range:', color_map['header'])} {colorize(str(args.keyboard_duration_range), color_map['tuple'])}
+{colorize('mouse duration range:', color_map['header'])} {colorize(str(args.mouse_duration_range), color_map['tuple'])}
+{colorize('jump probability:', color_map['header'])} {colorize(str(args.jump_probability), color_map['number'])}
+{colorize('inventory probability:', color_map['header'])} {colorize(str(args.inventory_probability), color_map['number'])}
+{colorize('move probability:', color_map['header'])} {colorize(str(args.move_probability), color_map['number'])}
+{colorize('turn probability:', color_map['header'])} {colorize(str(args.turn_probability), color_map['number'])}
+{colorize('chance increment:', color_map['header'])} {colorize(str(args.chance_increment), color_map['number'])}
+{colorize('sleep range:', color_map['header'])} {colorize(str(args.sleep_range), color_map['tuple'])}
+{colorize('log:', color_map['header'])} {colorize(str(args.log), color_map['bool_true'] if args.log else color_map['bool_false'])}
+{colorize('colors:', color_map['header'])} {colorize(str(args.colors), color_map['bool_true'] if args.colors else color_map['bool_false'])}
+"""
+    return string

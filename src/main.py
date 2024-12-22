@@ -1,7 +1,8 @@
 from master_class import Master
 from random import randint, uniform, random
 from time import sleep
-from utilities import parse_args, Logger
+from utilities import parse_args, Logger, logArgs
+from constants import welcome, farewell
 from pathlib import Path
 
 
@@ -9,7 +10,6 @@ from pathlib import Path
 try:
     if __name__ == "__main__":
         args = parse_args()
-
         KEYBOARD_DURATION_RANGE = args.keyboard_duration_range
         MOUSE_DURATION_RANGE = args.mouse_duration_range
         JUMP_PROBABILITY = args.jump_probability
@@ -44,9 +44,12 @@ try:
         ########### Initialization ###########
         if LOG:
             logs_path = Path.home() / "Documents" / "logs.txt"
-            print(f"Logs will be saved to: {logs_path}")
+            if COLORS:
+                print(f"\033[93mLogs will be saved to: {logs_path}\033[0m\n")
             logger = Logger(path=logs_path)
-        
+            welcome(COLORS)
+            print(logArgs(args))
+
         master = Master(keyboard_duration=KEYBOARD_DURATION_RANGE, mouse_duration=MOUSE_DURATION_RANGE)
         keySequence = master.generateKeySequence()
         index = 0
@@ -131,6 +134,7 @@ try:
             sleep(sleepTime) 
 
 except KeyboardInterrupt:
-    print("\n\033[95mGoodbye!\033[0m")
-    sleep(1.5)
-    exit(0)
+    if LOG:
+        farewell(COLORS)
+        sleep(1.5)
+        exit(0)
