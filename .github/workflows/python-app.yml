@@ -26,6 +26,11 @@ jobs:
       run: |
         pyinstaller build.spec
 
+    - name: Debug Build Directory
+      run: |
+        echo "Listing build directory contents:"
+        dir dist
+
     - name: Deploy to Google Drive
       uses: willo32/google-drive-upload-action@v1.1.0
       with:
