@@ -1,10 +1,22 @@
 from master_class import Master
 from random import randint, uniform, random
-from time import sleep
-from utilities import parse_args, Logger, logArgs
-from constants import welcome, farewell
+from time import sleep, time
+from arguments_parser import parse_args
+from logger import Logger, logArgs
+from hello_bye import welcome, farewell
 from pathlib import Path
+from sound_detector import wait_for_sound
 
+
+def biasedRandom(first, last, bias_toward_low=True):
+    r = random()
+
+    if bias_toward_low:
+        biased = r ** 2
+    else:
+        biased = 1 - (1 - r) ** 2
+
+    return first + (last - first) * biased
 
 
 try:
@@ -20,7 +32,15 @@ try:
         SLEEP_RANGE = args.sleep_range
         LOG = args.log
         COLORS = args.colors
-
+        SAMPLE_RATE = args.sample_rate
+        CHUNK_SIZE = args.chunk_size
+        THRESHOLD = args.threshold
+        AUTOREEL = args.autoreel
+        
+        # print(f"sample rate : {SAMPLE_RATE}")
+        # print(f"chunk size : {CHUNK_SIZE}")
+        # print(f"threshold : {THRESHOLD}")
+        # exit()
         # ## Tuple of (min, max) between mouse/keyboard down/up events
         # KEYBOARD_DURATION_RANGE = (0.1, 0.175)
         # MOUSE_DURATION_RANGE = (0.1, 0.200)
@@ -62,9 +82,11 @@ try:
             'turn': TURN_PROBABILITY
         }
 
+        sleep(3)      # gives time to focus the game
         while True:
+            master.fish()
             ############### BEGIN ###############
-            sleepTime = round(uniform(*SLEEP_RANGE), 2)
+            startTime = time()
             inventoryBool = False       # for logging purposes
             lookAroundBool = False      # for logging purposes
             jumpBool = False            # for logging purposes
@@ -78,8 +100,9 @@ try:
                 movedMouseNum = master.openInventory()
                 actions['inventory'] = MOVE_PROBABILITY
                 inventoryBool = True
+                sleep(round(uniform(*SLEEP_RANGE), 2))
             else:
-                actions['inventory'] += CHANCE_INCREMENT
+                actions['inventory'] += CHANCE_INCREMENT / 2
 
 
             ################ Jump ################
@@ -87,6 +110,7 @@ try:
                 master.jump()
                 actions['jump'] = JUMP_PROBABILITY
                 jumpBool = True
+                sleep(round(uniform(*SLEEP_RANGE), 2))
             else:
                 actions['jump'] += CHANCE_INCREMENT
 
@@ -97,6 +121,7 @@ try:
                 master.moveAndReturn(*lookedAtPointTuple)
                 actions['turn'] = TURN_PROBABILITY
                 lookAroundBool = True
+                sleep(round(uniform(*SLEEP_RANGE), 2))
             else:
                 actions['turn'] += CHANCE_INCREMENT
             
@@ -107,15 +132,33 @@ try:
                 index = (index + 1) % len(keySequence)
                 actions['move'] = MOVE_PROBABILITY
                 moveBool = True
+                sleep(round(uniform(*SLEEP_RANGE), 2))
             else:
                 actions['move'] += CHANCE_INCREMENT
 
+            if not moveBool and not jumpBool and not lookAroundBool and not inventoryBool:
+                sleep(round(uniform(*SLEEP_RANGE), 2))
+
+            wait_for_sound(threshold=THRESHOLD, sample_rate=SAMPLE_RATE, chunk_size=CHUNK_SIZE)
+            sleep(round(uniform(0.1, 0.2), 2))
+
+
+            if AUTOREEL:
+                print("autoreelnigs...")
+                master.fish()
+
+
+            ############### END ###############
+            iteration += 1
+            endTime = time()
+            iterationTime = round(endTime - startTime, 2)
+            sleep(2)
 
             ############### Logging ###############
             if LOG:
                 logger.log(
                     iteration=iteration,
-                    sleep_time=sleepTime,
+                    sleep_time=iterationTime,
                     inventory_bool=inventoryBool,
                     look_around_bool=lookAroundBool,
                     jump_bool=jumpBool,
@@ -126,12 +169,6 @@ try:
                 )
                 logger.printLogs(COLORS)
                 logger.writeLogs()
-
-
-            ############### END ###############
-            master.fish()
-            iteration += 1
-            sleep(sleepTime) 
 
 except KeyboardInterrupt:
     if LOG:

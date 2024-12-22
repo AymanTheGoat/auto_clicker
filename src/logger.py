@@ -1,87 +1,5 @@
-import argparse
 from typing import Tuple
 from datetime import datetime
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Control the script's behavior.")
-
-    # Duration ranges for keyboard and mouse events
-    parser.add_argument(
-        '--keyboard_duration_range', 
-        type=lambda s: tuple(map(float, s.split(','))), 
-        default=(0.1, 0.175), 
-        help="Tuple of (min, max) between mouse/keyboard down/up events for keyboard (default: (0.1, 0.175))"
-    )
-    
-    parser.add_argument(
-        '--mouse_duration_range', 
-        type=lambda s: tuple(map(float, s.split(','))), 
-        default=(0.1, 0.200), 
-        help="Tuple of (min, max) between mouse/keyboard down/up events for mouse (default: (0.1, 0.200))"
-    )
-
-    # Probabilities
-    parser.add_argument(
-        '--jump_probability', 
-        type=float, 
-        default=0.1, 
-        help="Probability to trigger jump (default: 0.1)"
-    )
-    
-    parser.add_argument(
-        '--inventory_probability', 
-        type=float, 
-        default=0.1, 
-        help="Probability to trigger inventory (default: 0.1)"
-    )
-    
-    parser.add_argument(
-        '--move_probability', 
-        type=float, 
-        default=0.1, 
-        help="Probability to trigger move (default: 0.1)"
-    )
-    
-    parser.add_argument(
-        '--turn_probability', 
-        type=float, 
-        default=0.1, 
-        help="Probability to trigger turn (default: 0.1)"
-    )
-
-    # Increment value for when an event is not triggered
-    parser.add_argument(
-        '--chance_increment', 
-        type=float, 
-        default=0.05, 
-        help="Value to add to probabilities when not triggered (default: 0.05)"
-    )
-
-    # Sleep range between iterations
-    parser.add_argument(
-        '--sleep_range', 
-        type=lambda s: tuple(map(int, s.split(','))), 
-        default=(7, 11), 
-        help="Tuple of (min, max) between every iteration (default: (7, 11))"
-    )
-
-    # Logging option
-    parser.add_argument(
-        '--log', 
-        action='store_true', 
-        default=False, 
-        help="Enable logging (default: False)"
-    )
-
-    # Colors option
-    parser.add_argument(
-        '--colors', 
-        action='store_false', 
-        default=True, 
-        help="Enable colors (ANSI escape sequences) (default: False)"
-    )
-
-    return parser.parse_args()
 
 
 class Logger:
@@ -202,5 +120,10 @@ def logArgs(args):
 {colorize('sleep range:', color_map['header'])} {colorize(str(args.sleep_range), color_map['tuple'])}
 {colorize('log:', color_map['header'])} {colorize(str(args.log), color_map['bool_true'] if args.log else color_map['bool_false'])}
 {colorize('colors:', color_map['header'])} {colorize(str(args.colors), color_map['bool_true'] if args.colors else color_map['bool_false'])}
+{colorize('autoreel:', color_map['header'])} {colorize(str(args.autoreel), color_map['bool_true'] if args.autoreel else color_map['bool_false'])}
+{colorize('sample rate:', color_map['header'])} {colorize(str(args.sample_rate), color_map['number'])}
+{colorize('chunk size:', color_map['header'])} {colorize(str(args.chunk_size), color_map['number'])}
+{colorize('threshold:', color_map['header'])} {colorize(str(args.threshold), color_map['number'])}
+
 """
     return string
